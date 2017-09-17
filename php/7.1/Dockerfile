@@ -12,3 +12,7 @@ RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-enable mongodb \
   && docker-php-source delete \
   && apk del .build-deps
+
+# composer taken from (https://github.com/geshan/docker-php-composer-alpine)
+ RUN apk --no-cache add curl git \
+   && curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
