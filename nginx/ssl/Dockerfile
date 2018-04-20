@@ -1,4 +1,4 @@
-FROM nginx:1.13.3-alpine
+FROM nginx:1.13.12-alpine
 WORKDIR /usr/share/nginx/html
 
 RUN mkdir -p /etc/nginx/snippets
