@@ -8,7 +8,7 @@ RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
                                    --with-png-dir=/usr/include/ \
                                    --with-jpeg-dir=/usr/include/ \
   && docker-php-ext-install gd mcrypt mysqli pdo pdo_mysql pdo_pgsql pgsql zip ftp opcache \
-  && pecl install mongodb redis xdebug \
+  && pecl install mongodb redis xdebug-2.5.5 \
   && docker-php-ext-enable mongodb \
   && docker-php-ext-enable redis \
   && docker-php-ext-enable xdebug \
