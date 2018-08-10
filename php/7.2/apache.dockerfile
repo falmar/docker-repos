@@ -1,8 +1,9 @@
-FROM php:5.6.37-fpm-alpine
+FROM php:7.2.8-apache
 WORKDIR /usr/share/nginx/html
-RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
-  && apk --no-cache add --virtual .ext-deps libmcrypt-dev freetype-dev \
-  libjpeg-turbo-dev libpng-dev libxml2-dev msmtp postgresql-dev \
+RUN apt-get update \
+  &&  apt-get install -y --no-install-recommends $PHPIZE_DEPS \
+  && apt-get install -y --no-install-recommends curl git libmcrypt-dev libfreetype6-dev \
+   libjpeg-dev libpng-dev libxml2-dev msmtp postgresql-server-dev-all \
   && docker-php-source extract \
   && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ \
                                    --with-png-dir=/usr/include/ \
@@ -12,7 +13,6 @@ RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-enable mongodb \
   && docker-php-ext-enable redis \
   && docker-php-source delete \
-  && apk del .build-deps \
+  && rm -rf /var/lib/apt/lists/* \
   # composer taken from (https://github.com/geshan/docker-php-composer-alpine)
-  && apk --no-cache add curl git \
   && curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
