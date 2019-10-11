@@ -1,6 +1,8 @@
 FROM php:7.1.32-fpm-alpine3.10
 WORKDIR /usr/share/nginx/html
-RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
+RUN  apk --no-cache add curl git python-dev libffi-dev openssl-dev gcc libc-dev make py-pip \
+  && pip install docker-compose \
+  && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && apk --no-cache add --virtual .ext-deps libmcrypt-dev freetype-dev \
   libjpeg-turbo-dev libpng-dev libxml2-dev msmtp postgresql-dev \
   && docker-php-source extract \
@@ -14,5 +16,4 @@ RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-source delete \
   && apk del .build-deps \
   # composer taken from (https://github.com/geshan/docker-php-composer-alpine)
-  && apk --no-cache add curl git \
   && curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer

@@ -1,4 +1,4 @@
-FROM php:7.1.28-apache
+FROM php:7.1.32-apache
 WORKDIR /usr/share/nginx/html
 RUN apt-get update \
   &&  apt-get install -y --no-install-recommends $PHPIZE_DEPS \

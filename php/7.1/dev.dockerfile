@@ -1,4 +1,4 @@
-FROM php:7.1.28-fpm-alpine3.8
+FROM php:7.1.32-fpm-alpine3.10
 WORKDIR /usr/share/nginx/html
 RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && apk --no-cache add --virtual .ext-deps libmcrypt-dev freetype-dev \
