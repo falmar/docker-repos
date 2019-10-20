@@ -1,3 +1,0 @@
-FROM golang:1.9.2-alpine
-RUN apk --no-cache add openssh git curl ca-certificates 'py-pip' \
-    && pip install 'docker-compose'
