@@ -1,8 +1,7 @@
-FROM php:7.1.32-fpm-alpine3.10
+FROM php:7.2.30-alpine3.11
 WORKDIR /usr/share/nginx/html
 RUN  apk --no-cache add curl git python-dev libffi-dev openssl-dev gcc libc-dev make py-pip \
     && pip install docker-compose \
-    && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
     && apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev \
     && apk --no-cache add --virtual .ext-req freetype libjpeg libpng \
     && docker-php-source extract \
@@ -11,8 +10,8 @@ RUN  apk --no-cache add curl git python-dev libffi-dev openssl-dev gcc libc-dev 
                                      --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd zip opcache \
     && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+    && pecl install redis mongodb \
+    && docker-php-ext-enable redis mongodb \
     && docker-php-source delete \
     && apk del .ext-deps \
     && apk del .build-deps \

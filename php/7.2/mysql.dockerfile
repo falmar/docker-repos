@@ -1,4 +1,4 @@
-FROM php:7.2.23-fpm-alpine3.10
+FROM php:7.2.30-fpm-alpine3.11
 RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev \
   && apk --no-cache add --virtual .ext-req freetype libjpeg libpng \
   && docker-php-source extract \
