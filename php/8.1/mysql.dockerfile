@@ -1,4 +1,4 @@
-FROM php:8.1.7-fpm-alpine
+FROM php:8.1.18-fpm-alpine
 RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev \
   && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip \
   && docker-php-source extract \
