@@ -36,6 +36,7 @@ jobs:
       - name: Build and push base
         uses: docker/build-push-action@v4
         with:
+          platforms: linux/amd64,linux/arm64
           context: .
           push: true
           file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
