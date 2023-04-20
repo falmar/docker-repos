@@ -1,6 +1,6 @@
 FROM php:8.1.18-fpm-alpine
 RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev \
-  && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip \
+  && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip linux-headers \
   && docker-php-source extract \
   && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
