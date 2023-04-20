@@ -5,6 +5,7 @@ on:
       - master
 
 env:
+  HUB_USERNAME: ${{ vars.HUB_USERNAME }}
   REGISTRY: docker.io
   DOCKER_IMAGE: php
 
