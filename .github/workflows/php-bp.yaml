@@ -40,7 +40,7 @@ jobs:
           push: true
           file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
           tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
-          cache-from: type=gha .
+          cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Build and push dev
@@ -50,5 +50,5 @@ jobs:
           push: true
           file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}-dev.dockerfile
           tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
-          cache-from: type=gha .
+          cache-from: type=gha
           cache-to: type=gha,mode=max
