@@ -1,0 +1,42 @@
+name: hostname_images
+on:
+  push:
+    branches:
+      - master
+
+env:
+  HUB_USERNAME: ${{ vars.HUB_USERNAME }}
+  REGISTRY: docker.io
+  DOCKER_IMAGE: hostname
+  DOCKER_IMAGE_TAG: latest
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.HUB_USERNAME }}
+          password: ${{ secrets.HUB_PASSWORD }}
+
+      - name: Build and push base
+        uses: docker/build-push-action@v4
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          push: true
+          file: ./hostname/Dockerfile
+          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
