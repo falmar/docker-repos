@@ -1,4 +1,4 @@
-FROM php:8.1.7-fpm-alpine
+FROM php:8.1-alpine
 WORKDIR /usr/share/nginx/html
 RUN  apk --no-cache add curl git docker-compose \
     && apk --no-cache add --virtual .ext-deps libzip-dev \
