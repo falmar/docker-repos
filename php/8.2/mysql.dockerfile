@@ -4,11 +4,13 @@ RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng
   && docker-php-source extract \
   && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+  && docker-php-ext-configure opcache --enable-opcache \
   && docker-php-ext-install gd mysqli pdo pdo_mysql zip opcache pcntl \
-  && pecl install redis \
-  && docker-php-ext-enable redis pcntl \
+  && pecl install redis apcu \
+  && docker-php-ext-enable redis pcntl apcu \
   && docker-php-source delete \
   && apk del .ext-deps \
+  && pecl clear-cache \
   && apk del .build-deps \
   # composer taken from (https://github.com/geshan/docker-php-composer-alpine)
   && apk --no-cache add curl git \
