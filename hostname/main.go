@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -11,6 +12,10 @@ import (
 var hostname string
 
 func handleHostname(w http.ResponseWriter, r *http.Request) {
+	slog.Info("hostname request",
+		"path", r.URL.Path,
+	)
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte(hostname))
@@ -18,29 +23,42 @@ func handleHostname(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 }
-func handleHealth(w http.ResponseWriter, r *http.Request) {
+func handleHealth(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	_, err := w.Write([]byte("ok"))
+
+	var msg string
+	if hostname == "" {
+		msg = "not ok"
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		msg = "ok"
+		w.WriteHeader(http.StatusOK)
+	}
+
+	slog.Info("healthcheck request", "status", msg)
+
+	_, err := w.Write([]byte(msg))
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func main() {
-	// read hostname
-	f, err := os.Open("/etc/hostname")
-	if err != nil {
-		log.Fatalln(err)
-	}
+func handleNotFound(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(404)
+}
 
-	b, err := io.ReadAll(f)
-	if err != nil {
-		_ = f.Close()
-		log.Fatalln("unable to read hostname:", err)
+func main() {
+	// try find it on ENV
+	hostname = os.Getenv("HOSTNAME")
+	var err error
+
+	// read hostname from file
+	if hostname == "" {
+		if hostname, err = fromFile("/etc/hostname"); err != nil {
+			slog.Error("unable to read hostname from /etc/hostname", "error", err)
+			os.Exit(1)
+		}
 	}
-	_ = f.Close()
-	hostname = string(b)
 
 	// setup server
 	port := os.Getenv("PORT")
@@ -53,12 +71,31 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handleHostname)
-	mux.HandleFunc("/hostname", handleHostname)
-	mux.HandleFunc("/healthz", handleHealth)
+	mux.HandleFunc("GET /", handleHostname)
+	mux.HandleFunc("GET /hostname", handleHostname)
+	mux.HandleFunc("GET /healthz", handleHealth)
+	mux.HandleFunc("GET /{catchall}", handleNotFound)
 
 	server.Handler = mux
+
+	slog.Info("http server started", "port", port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func fromFile(p string) (string, error) {
+	f, err := os.Open(p)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+	hostname = string(b)
+
+	return hostname, nil
 }
