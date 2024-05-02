@@ -1,17 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 )
 
 var hostname string
 
 func handleHostname(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	slog.Info("hostname request",
 		"path", r.URL.Path,
 	)
@@ -23,7 +26,8 @@ func handleHostname(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 }
-func handleHealth(w http.ResponseWriter, _ *http.Request) {
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	w.Header().Set("Content-Type", "text/plain")
 
 	var msg string
@@ -48,6 +52,9 @@ func handleNotFound(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer cancel()
+
 	// try find it on ENV
 	hostname = os.Getenv("HOSTNAME")
 	var err error
@@ -78,8 +85,17 @@ func main() {
 
 	server.Handler = mux
 
+	go func() {
+		<-ctx.Done()
+		log.Println("shutting down server")
+		err := server.Shutdown(ctx)
+		if err != nil {
+			log.Println("error shutting down http server:", err)
+		}
+	}()
+
 	slog.Info("http server started", "port", port)
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalln(err)
 	}
 }
