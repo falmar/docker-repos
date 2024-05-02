@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        php_version: [7.4, 8.1]
+        php_version: [8.2, 8.3]
         tag: [mysql, mysql-dev]
 
     runs-on: ubuntu-latest
