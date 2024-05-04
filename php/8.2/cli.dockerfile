@@ -1,4 +1,4 @@
-FROM php:8.2-cli-alpine as base
+FROM php:8.2-cli-alpine AS base
 RUN apk --no-cache add --virtual .ext-deps libzip-dev \
   && apk --no-cache add --virtual .ext-req libzip \
   && docker-php-source extract \
@@ -15,7 +15,8 @@ RUN apk --no-cache add --virtual .ext-deps libzip-dev \
   && apk --no-cache add curl git \
   && curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
-FROM base as dev
+
+FROM base AS dev
 RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS linux-headers \
   && pecl install xdebug \
   && docker-php-ext-enable xdebug \

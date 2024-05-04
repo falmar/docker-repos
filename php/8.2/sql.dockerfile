@@ -1,4 +1,4 @@
-FROM php:8.2.17-fpm-alpine3.19 as base
+FROM php:8.2.17-fpm-alpine3.19 AS base
 RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev libpq-dev icu-dev \
   && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip libpq icu \
   && docker-php-source extract \
@@ -17,7 +17,7 @@ RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng
   && curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 
-FROM base as dev
+FROM base AS dev
 RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS linux-headers \
   && pecl install xdebug \
   && docker-php-ext-enable xdebug \
