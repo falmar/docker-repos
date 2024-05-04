@@ -1,12 +1,13 @@
-FROM php:8.2-fpm-alpine
-RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev libpq-dev \
-  && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip libpq \
+FROM php:8.2.17-fpm-alpine3.19
+RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev libpq-dev icu-dev \
+  && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip libpq icu \
   && docker-php-source extract \
   && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-  && docker-php-ext-install gd pdo pdo_pgsql zip opcache pcntl \
+  && docker-php-ext-configure opcache --enable-opcache \
+  && docker-php-ext-install gd mysqli pdo pdo_mysql pdo_pgsql zip opcache pcntl intl \
   && pecl install redis apcu \
-  && docker-php-ext-enable redis pcntl apcu \
+  && docker-php-ext-enable redis pcntl apcu intl \
   && docker-php-source delete \
   && apk del .ext-deps \
   && pecl clear-cache \
