@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         php_version: [8.2, 8.3]
-        tag: [sql, sql-dev]
+        tag: [sql]
 
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +33,7 @@ jobs:
           username: ${{ env.HUB_USERNAME }}
           password: ${{ secrets.HUB_PASSWORD }}
 
-      - name: Build and push base
+      - name: Build and push base SQL
         uses: docker/build-push-action@v4
         with:
           platforms: linux/amd64,linux/arm64
@@ -41,5 +41,16 @@ jobs:
           push: true
           file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
           tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push base SQL dev
+        uses: docker/build-push-action@v4
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          push: true
+          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}-dev.dockerfile
+          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
