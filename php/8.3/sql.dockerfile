@@ -5,7 +5,7 @@ RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng
   && apk --no-cache add --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
   && docker-php-ext-configure opcache --enable-opcache \
-  && docker-php-ext-install gd mysqli pdo pdo_mysql pdo_pgsql zip opcache pcntl \
+  && docker-php-ext-install gd mysqli pdo pdo_mysql pdo_pgsql zip opcache pcntl intl \
   && pecl install redis apcu \
   && docker-php-ext-enable redis pcntl apcu intl \
   && docker-php-source delete \
