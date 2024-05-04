@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm-alpine3.19 as base
 RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev libpq-dev icu-dev \
   && apk --no-cache add --virtual .ext-req freetype libjpeg libpng libwebp libzip libpq icu \
   && docker-php-source extract \
@@ -15,3 +15,11 @@ RUN apk --no-cache add --virtual .ext-deps freetype-dev libjpeg-turbo-dev libpng
   # composer taken from (https://github.com/geshan/docker-php-composer-alpine)
   && apk --no-cache add curl git \
   && curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+
+
+FROM base as dev
+RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS linux-headers \
+  && pecl install xdebug \
+  && docker-php-ext-enable xdebug \
+  && docker-php-source delete \
+  && apk del .build-deps
