@@ -1,4 +1,4 @@
-FROM falmar/php:8.2.17-mysql
+FROM falmar/php:8.2-sql
 RUN apk --no-cache add --virtual .build-deps $PHPIZE_DEPS linux-headers \
   && pecl install xdebug \
   && docker-php-ext-enable xdebug \
