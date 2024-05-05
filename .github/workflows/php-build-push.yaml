@@ -5,18 +5,22 @@ on:
       - master
 
 env:
-  HUB_USERNAME: ${{ vars.HUB_USERNAME }}
   REGISTRY: docker.io
+  DOCKER_USERNAME: ${{ vars.HUB_USERNAME }}
   DOCKER_IMAGE: php
+  DOCKER_IMAGE_NAME: docker.io/${{ vars.HUB_USERNAME }}/php
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    name: build platform images
+
     strategy:
       matrix:
         php_version: [ 8.2, 8.3 ]
         tag: [ cli, sql ]
+        arch: [ amd64, arm64]
 
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -42,29 +46,94 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ env.HUB_USERNAME }}
+          username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.HUB_PASSWORD }}
 
-#      - name: Build and push base SQL
-#        uses: docker/build-push-action@v4
-#        with:
-#          platforms: linux/amd64,linux/arm64
-#          context: .
-#          push: true
-#          target: base
-#          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
-#          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
-#          cache-from: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache
-#          cache-to: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
-#
-#      - name: Build and push base SQL dev
-#        uses: docker/build-push-action@v4
-#        with:
-#          platforms: linux/amd64,linux/arm64
-#          context: .
-#          push: true
-#          target: dev
-#          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
-#          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
-#          cache-from: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache
-#          cache-to: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
+      - name: Build and push base SQL
+        uses: docker/build-push-action@v4
+        env:
+          DOCKER_FULL_IMAGE: "${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.php_version }}-${{ matrix.tag }}-${{matrix.arch}}"
+        with:
+          platforms: linux/${{matrix.arch}}
+          context: .
+          push: true
+          target: base
+          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
+          tags: "${{ env.DOCKER_FULL_IMAGE }}"
+
+          cache-from: |
+            type=registry,ref=${{ env.DOCKER_FULL_IMAGE }}-cache
+            type=registry,ref=${{ env.DOCKER_FULL_IMAGE }}-cache-dev
+          cache-to: type=registry,ref=${{ env.DOCKER_FULL_IMAGE }}-cache,mode=max,force-compression=true
+
+      - name: Build and push base SQL dev
+        uses: docker/build-push-action@v4
+        env:
+          DOCKER_FULL_IMAGE: "${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.php_version }}-${{ matrix.tag }}-${{matrix.arch}}"
+        with:
+          platforms: linux/${{matrix.arch}}
+          context: .
+          push: true
+          target: dev
+          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
+          tags: "${{ env.DOCKER_FULL_IMAGE }}-dev"
+
+          cache-from: |
+            type=registry,ref=${{ env.DOCKER_FULL_IMAGE }}-cache
+            type=registry,ref=${{ env.DOCKER_FULL_IMAGE }}-cache-dev
+          cache-to: type=registry,ref=${{ env.DOCKER_FULL_IMAGE }}-cache-dev,mode=max,force-compression=true
+
+
+  manifest:
+    needs:
+      - build
+    name: push merged platform images
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php_version: [ 8.2, 8.3 ]
+        tag: [ cli, sql ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.HUB_PASSWORD }}
+
+      - name: Create and push Docker Manifest
+        env:
+          DOCKER_FULL_IMAGE: "${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.php_version }}-${{ matrix.tag }}"
+
+        run: |
+          docker manifest create \
+            ${{ env.DOCKER_FULL_IMAGE }} \
+            ${{ env.DOCKER_FULL_IMAGE }}-amd64 \
+            ${{ env.DOCKER_FULL_IMAGE }}-arm64 
+
+          docker manifest annotate --arch arm64 ${{ env.DOCKER_FULL_IMAGE }} \
+                ${{ env.DOCKER_FULL_IMAGE }}-arm64
+          docker manifest annotate --arch amd64 ${{ env.DOCKER_FULL_IMAGE }} \
+                ${{ env.DOCKER_FULL_IMAGE }}-amd64
+          
+          docker manifest push ${{ env.DOCKER_FULL_IMAGE }}
+
+      - name: Create and push dev Docker Manifest
+        env:
+          DOCKER_FULL_IMAGE: "${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.php_version }}-${{ matrix.tag }}"
+
+        run: |
+          docker manifest create \
+            ${{ env.DOCKER_FULL_IMAGE }}-dev \
+            ${{ env.DOCKER_FULL_IMAGE }}-amd64-dev  \
+            ${{ env.DOCKER_FULL_IMAGE }}-arm64-dev 
+
+          docker manifest annotate --arch arm64 ${{ env.DOCKER_FULL_IMAGE }} \
+                ${{ env.DOCKER_FULL_IMAGE }}-arm64-dev
+          docker manifest annotate --arch amd64 ${{ env.DOCKER_FULL_IMAGE }} \
+                ${{ env.DOCKER_FULL_IMAGE }}-amd64-dev
+          
+          docker manifest push ${{ env.DOCKER_FULL_IMAGE }}-dev
