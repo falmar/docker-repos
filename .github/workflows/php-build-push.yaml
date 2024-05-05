@@ -133,9 +133,9 @@ jobs:
             ${{ env.DOCKER_FULL_IMAGE }}-amd64-dev  \
             ${{ env.DOCKER_FULL_IMAGE }}-arm64-dev 
 
-          docker manifest annotate --arch arm64 ${{ env.DOCKER_FULL_IMAGE }} \
+          docker manifest annotate --arch arm64 ${{ env.DOCKER_FULL_IMAGE }}-dev \
                 ${{ env.DOCKER_FULL_IMAGE }}-arm64-dev
-          docker manifest annotate --arch amd64 ${{ env.DOCKER_FULL_IMAGE }} \
+          docker manifest annotate --arch amd64 ${{ env.DOCKER_FULL_IMAGE }}-dev \
                 ${{ env.DOCKER_FULL_IMAGE }}-amd64-dev
           
           docker manifest push ${{ env.DOCKER_FULL_IMAGE }}-dev
