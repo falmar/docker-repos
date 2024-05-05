@@ -13,8 +13,8 @@ jobs:
   build:
     strategy:
       matrix:
-        php_version: [8.2, 8.3]
-        tag: [cli, sql]
+        php_version: [ 8.2, 8.3 ]
+        tag: [ cli, sql ]
 
     runs-on: ubuntu-latest
     steps:
@@ -45,26 +45,26 @@ jobs:
           username: ${{ env.HUB_USERNAME }}
           password: ${{ secrets.HUB_PASSWORD }}
 
-      - name: Build and push base SQL
-        uses: docker/build-push-action@v4
-        with:
-          platforms: linux/amd64,linux/arm64
-          context: .
-          push: true
-          target: base
-          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
-          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
-#          cache-from: type=gha
-#          cache-to: type=gha,mode=max
-
-      - name: Build and push base SQL dev
-        uses: docker/build-push-action@v4
-        with:
-          platforms: linux/amd64,linux/arm64
-          context: .
-          push: true
-          target: dev
-          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
-          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
-#          cache-from: type=gha
-#          cache-to: type=gha,mode=max
+#      - name: Build and push base SQL
+#        uses: docker/build-push-action@v4
+#        with:
+#          platforms: linux/amd64,linux/arm64
+#          context: .
+#          push: true
+#          target: base
+#          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
+#          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
+#          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache
+#          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
+#
+#      - name: Build and push base SQL dev
+#        uses: docker/build-push-action@v4
+#        with:
+#          platforms: linux/amd64,linux/arm64
+#          context: .
+#          push: true
+#          target: dev
+#          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
+#          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
+#          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache
+#          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true

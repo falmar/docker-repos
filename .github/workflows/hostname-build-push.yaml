@@ -49,5 +49,5 @@ jobs:
           push: true
           file: ./hostname/Dockerfile
           tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
