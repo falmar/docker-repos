@@ -9,13 +9,14 @@ env:
   REGISTRY: docker.io
   DOCKER_IMAGE: hostname
   DOCKER_IMAGE_TAG: latest
+  DOCKER_FULL_IMAGE: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
+  DOCKER_CACHE_IMAGE: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}-build-cache"
 
 jobs:
   build:
     name: build platform images
     strategy:
       matrix:
-        os: [ linux ]
         arch: [ amd64, arm64 ]
 
     runs-on: ubuntu-latest
@@ -50,15 +51,15 @@ jobs:
         uses: docker/build-push-action@v4
 
         env:
-          CACHE_IMAGE: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache-${{matrix.os}}-${{matrix.arch}}"
+          CACHE_IMAGE: "${{ env.DOCKER_CACHE_IMAGE }}-linux-${{matrix.arch}}"
 
         with:
-          platforms: "${{matrix.os}}/${{matrix.arch}}"
+          platforms: "linux/${{matrix.arch}}"
           context: .
           push: true
           provenance: false
           file: ./hostname/Dockerfile
-          tags: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}-${{matrix.os}}-${{matrix.arch}}"
+          tags: "${{ env.DOCKER_FULL_IMAGE }}-linux-${{matrix.arch}}"
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
           cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max,force-compression=true
 
@@ -67,8 +68,6 @@ jobs:
       - build
     name: push merged platform images
     runs-on: ubuntu-latest
-    env:
-      DOCKER_FULL_IMAGE: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
 
     steps:
       - uses: actions/checkout@v3
@@ -80,6 +79,7 @@ jobs:
           password: ${{ secrets.HUB_PASSWORD }}
 
       - name: Create and push Docker Manifest
+
         run: |
           docker manifest create \
             ${{ env.DOCKER_FULL_IMAGE }} \
