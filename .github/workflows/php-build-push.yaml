@@ -54,8 +54,8 @@ jobs:
           target: base
           file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
           tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
 
       - name: Build and push base SQL dev
         uses: docker/build-push-action@v4
@@ -66,5 +66,5 @@ jobs:
           target: dev
           file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
           tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
