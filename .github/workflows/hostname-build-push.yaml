@@ -9,8 +9,8 @@ env:
   REGISTRY: docker.io
   DOCKER_IMAGE: hostname
   DOCKER_IMAGE_TAG: latest
-  DOCKER_FULL_IMAGE: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
-  DOCKER_CACHE_IMAGE: "${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}-build-cache"
+  DOCKER_FULL_IMAGE: "docker.io/falmar/hostname:latest"
+  DOCKER_CACHE_IMAGE: "docker.io/falmar/hostname:latest-build-cache"
 
 jobs:
   build:
@@ -51,15 +51,15 @@ jobs:
         uses: docker/build-push-action@v4
 
         env:
-          CACHE_IMAGE: "${{ env.DOCKER_CACHE_IMAGE }}-linux-${{matrix.arch}}"
+          CACHE_IMAGE: "${{ env.DOCKER_CACHE_IMAGE }}-linux-${{ matrix.arch }}"
 
         with:
-          platforms: "linux/${{matrix.arch}}"
+          platforms: "linux/${{ matrix.arch }}"
           context: .
           push: true
           provenance: false
           file: ./hostname/Dockerfile
-          tags: "${{ env.DOCKER_FULL_IMAGE }}-linux-${{matrix.arch}}"
+          tags: "${{ env.DOCKER_FULL_IMAGE }}-linux-${{ matrix.arch }}"
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
           cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max,force-compression=true
 
