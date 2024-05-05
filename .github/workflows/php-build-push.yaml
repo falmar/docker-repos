@@ -54,8 +54,8 @@ jobs:
 #          target: base
 #          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
 #          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}
-#          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache
-#          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
+#          cache-from: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache
+#          cache-to: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
 #
 #      - name: Build and push base SQL dev
 #        uses: docker/build-push-action@v4
@@ -66,5 +66,5 @@ jobs:
 #          target: dev
 #          file: ./php/${{ matrix.php_version }}/${{ matrix.tag }}.dockerfile
 #          tags: ${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ matrix.php_version }}-${{ matrix.tag }}-dev
-#          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache
-#          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
+#          cache-from: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache
+#          cache-to: type=registry,ref=${{ env.HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:build-cache,mode=max,force-compression=true
