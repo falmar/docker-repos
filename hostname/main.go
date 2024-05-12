@@ -12,12 +12,18 @@ import (
 )
 
 var hostname string
+var logSourceIp *bool = new(bool)
 
 func handleHostname(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	slog.Info("hostname request",
-		"path", r.URL.Path,
-	)
+	var attrs = make([]any, 0, 8)
+	attrs = append(attrs, "hostname", hostname, "path", r.URL.Path)
+
+	if *logSourceIp {
+		attrs = append(attrs, "ip", r.RemoteAddr, "forwarded-for", r.Header.Get("X-Forwarded-For"))
+	}
+
+	slog.Info("hostname request", attrs...)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
@@ -56,8 +62,13 @@ func main() {
 	defer cancel()
 
 	// try find it on ENV
+	*logSourceIp = false
 	hostname = os.Getenv("HOSTNAME")
 	var err error
+
+	if os.Getenv("LOG_SOURCE_IP") != "" && os.Getenv("LOG_SOURCE_IP") != "0" && os.Getenv("LOG_SOURCE_IP") != "false" {
+		*logSourceIp = true
+	}
 
 	// read hostname from file
 	if hostname == "" {
