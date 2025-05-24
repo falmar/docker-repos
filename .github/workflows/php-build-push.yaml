@@ -13,7 +13,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: build platform images
+    name: Build Images
 
     strategy:
       matrix:
@@ -91,13 +91,13 @@ jobs:
   manifest:
     needs:
       - build
-    name: push merged platform images
+    name: Push Docker Manifest
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         php_version: [ "8.2", "8.3", "8.4" ]
-        tag: [ cli, sql ]
+        tag: [ cli, fpm ]
 
     steps:
       - uses: actions/checkout@v3
