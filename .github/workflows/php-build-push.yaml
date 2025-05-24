@@ -1,4 +1,4 @@
-name: php_images
+name: PHP Images Build&Push
 on:
   push:
     branches:

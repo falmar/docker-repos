@@ -1,4 +1,4 @@
-name: hostname_images
+name: Hostname Images Build&Push
 on:
   push:
     branches:
