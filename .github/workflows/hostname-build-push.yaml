@@ -51,44 +51,14 @@ jobs:
         uses: docker/build-push-action@v6
 
         env:
-          CACHE_IMAGE: "${{ env.DOCKER_CACHE_IMAGE }}-linux-${{ matrix.arch }}"
+          CACHE_IMAGE: "${{ env.DOCKER_CACHE_IMAGE }}-linux"
 
         with:
-          platforms: "linux/${{ matrix.arch }}"
+          platforms: "linux/amd64,linux/arm64"
           context: .
           push: true
-          provenance: false
+          provenance: true
           file: ./hostname/Dockerfile
-          tags: "${{ env.DOCKER_FULL_IMAGE }}-linux-${{ matrix.arch }}"
+          tags: "${{ env.DOCKER_FULL_IMAGE }}"
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
           cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max,force-compression=true
-
-  manifest:
-    needs:
-      - build
-    name: push merged platform images
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ env.HUB_USERNAME }}
-          password: ${{ secrets.HUB_PASSWORD }}
-
-      - name: Create and push Docker Manifest
-
-        run: |
-          docker manifest create \
-            ${{ env.DOCKER_FULL_IMAGE }} \
-            ${{ env.DOCKER_FULL_IMAGE }}-linux-amd64  \
-            ${{ env.DOCKER_FULL_IMAGE }}-linux-arm64 
-
-          docker manifest annotate --arch arm64 ${{ env.DOCKER_FULL_IMAGE }} \
-                ${{ env.DOCKER_FULL_IMAGE }}-linux-arm64
-          docker manifest annotate --arch amd64 ${{ env.DOCKER_FULL_IMAGE }} \
-                ${{ env.DOCKER_FULL_IMAGE }}-linux-amd64
-          
-          docker manifest push ${{ env.DOCKER_FULL_IMAGE }}
